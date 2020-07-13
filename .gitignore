@@ -1,0 +1,23 @@
+# Airflow files
+*.log
+*.cfg
+*.db
+*.pid
+
+# Logs folder
+../logs/
+
+# Python cache folder
+__pycache__/
+
+# hidden folder
+.idea/
+
+# Local files
+*.txt
+*.csv
+*.xls
+*.xlsx
+*.xlsb
+*.doc
+*.docx
