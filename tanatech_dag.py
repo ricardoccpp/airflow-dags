@@ -17,12 +17,14 @@ def copy_from_file(schema, table, local_path, delimiter=',', encoding='utf-8', t
                    connection='covid_db_postgres'):
     conn = PostgresHook(connection)
     conn_engine = conn.get_sqlalchemy_engine()
-    print(table)
     if truncate:
+        print('Truncating table...')
         conn_engine.execute(f'truncate table {schema}.{table};')
+    print('Loading table...')
     conn_engine.execute(f"""copy {schema}.{table}
                             from '{local_path}'
-                            delimiters '{delimiter}' csv header encoding '{encoding}';""")
+                            delimiters '{delimiter}' csv header encoding '{encoding}';
+                            commit;""")
     return f'Table: {table} loaded!'
 
 # Execute script writen in a sql file
