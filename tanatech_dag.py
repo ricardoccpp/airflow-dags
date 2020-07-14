@@ -35,6 +35,13 @@ def execute_script_file(script_path, connection='covid_db_postgres'):
     conn_engine.execute(query)
     return f'Script: {script_path} executed!'
 
+def execute_test_sql(script_path, connection='covid_db_postgres'):
+    query = open(script_path, 'r').read()
+    conn = PostgresHook(connection)
+    result_sql = conn.get_records(query)
+    print(result_sql)
+    return f'Script: {script_path} executed!'
+
 
 with DAG(dag_id='tanatech_dag',
          default_args=args,
@@ -128,6 +135,13 @@ with DAG(dag_id='tanatech_dag',
         op_kwargs={'script_path': AIRFLOW_HOME + ('/dags/ETL_Scripts/002_join_stage_data_patients.sql')}
     )
 
+    teste_sql = PythonOperator(
+        task_id='task_teste_sql',
+        python_callable=execute_test_sql,
+        op_kwargs={'script_path': AIRFLOW_HOME + ('/dags/ETL_Scripts/teste_sql.sql')}
+    )
+
+
     # load_tasks = [
     #     load_stg_exam_results_sirio,
     #     load_stg_exam_results_fleury,
@@ -152,3 +166,5 @@ with DAG(dag_id='tanatech_dag',
     load_stg_patients_sirio >> join_stage_patients
     load_stg_patients_fleury >> join_stage_patients
     load_stg_patients_einstein >> join_stage_patients
+
+    join_stage_patients >> teste_sql
