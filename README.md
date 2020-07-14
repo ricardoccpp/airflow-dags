@@ -15,9 +15,6 @@ Once Airflow's virtual environment installed, the next steps will be install Apa
 #linux
 . <your_venv_folder>/bin/activate
 
-#windows
-<your_venv_folder>/Scripts/activate.bat
-
 pip install apache-airflow
 pip install 'apache-airflow[postgres]'
 pip install cryptography
@@ -30,13 +27,16 @@ Then, start Airflow DB, Scheduler and Webserver.
 airflow initdb
 airflow scheduler
 airflow webserver
-
-#windows
-python -m airflow initdb
-python -m airflow scheduler
-python -m airflow webserver
 ```
+
+[Option step]:
+
+When running scheduler and webserver on a terminal, it will lock your session, so you can use some kind of session manager tool like Tmux
+
+tmux new -s <session_name> -> create a new session
+tmux ls -> list sessions
+tmux a -t <session_name> -> attach session
+ctrl+b d -> deattach session
 
 As default, Airflow will create a default folder within SQLITE DB, config and log files.
 * On Linux it's usually on **~/airflow/**
-* On Windows it's usually on **C:/Users/<your_user>/airflow/**
