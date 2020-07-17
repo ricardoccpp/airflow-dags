@@ -1,4 +1,5 @@
 from datetime import timedelta
+import codecs
 
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
@@ -11,6 +12,31 @@ args = {
     'owner': 'Ricardo Tanaka',
     'start_date': days_ago(2),
 }
+
+# copy data from local file to table
+def copy_from_local_file(schema, table, local_path, delimiter=',', encoding='utf-8', truncate=True,
+                   connection='covid_db_postgres'):
+    conn = PostgresHook(connection)
+    conn_engine = conn.get_sqlalchemy_engine()
+    if encoding != 'utf-8':
+        print('Starting encoding conversion...')
+        targetFileName = 'teste.csv'
+        BLOCKSIZE = 1048576  # or some other, desired size in bytes
+        with codecs.open(local_path, 'r', encoding) as sourceFile:
+            with codecs.open(targetFileName, 'w', 'utf-8') as targetFile:
+                while True:
+                    contents = sourceFile.read(BLOCKSIZE)
+                    if not contents:
+                        break
+                    targetFile.write(contents)
+        local_path = targetFileName
+    if truncate:
+        print('Truncating table...')
+        conn_engine.execute(f'truncate table {schema}.{table};')
+    print('Loading table...')
+    sql = f"COPY {schema}.{table} FROM STDIN DELIMITERS '{delimiter}' csv header encoding 'utf-8'"
+    conn.copy_expert(sql, filename=local_path)
+    return f'Table: {table} loaded!'
 
 # copy data from file to table
 def copy_from_file(schema, table, local_path, delimiter=',', encoding='utf-8', truncate=True,
@@ -58,10 +84,10 @@ with DAG(dag_id='tanatech_dag',
     # Exams
     load_stg_exam_results_sirio = PythonOperator(
         task_id='load_table_stg_exam_results_sirio',
-        python_callable=copy_from_file,
+        python_callable=copy_from_local_file,
         op_kwargs={'schema': 'stage',
                    'table': 'stg_exam_results_sirio',
-                   'local_path': '/mnt/sharedstorage/hsl_lab_result_1.csv',
+                   'local_path': '/Users/ricardotanaka/Documents/Projetos/COVID/hsl_lab_result_1.csv',
                    'delimiter': '|',
                    'encoding': 'utf-8',
                    'truncate': True}
@@ -69,10 +95,10 @@ with DAG(dag_id='tanatech_dag',
 
     load_stg_exam_results_fleury = PythonOperator(
         task_id='load_stg_exam_results_fleury',
-        python_callable=copy_from_file,
+        python_callable=copy_from_local_file,
         op_kwargs={'schema': 'stage',
                    'table': 'stg_exam_results_fleury',
-                   'local_path': '/mnt/sharedstorage/Grupo_Fleury_Dataset_Covid19_Resultados_Exames.csv',
+                   'local_path': '/Users/ricardotanaka/Documents/Projetos/COVID/Grupo_Fleury_Dataset_Covid19_Resultados_Exames.csv',
                    'delimiter': '|',
                    'encoding': 'latin1',
                    'truncate': True}
@@ -80,10 +106,10 @@ with DAG(dag_id='tanatech_dag',
 
     load_stg_exam_results_einstein = PythonOperator(
         task_id='load_stg_exam_results_einstein',
-        python_callable=copy_from_file,
+        python_callable=copy_from_local_file,
         op_kwargs={'schema': 'stage',
                    'table': 'stg_exam_results_einstein',
-                   'local_path': '/mnt/sharedstorage/einstein_full_dataset_exames.csv',
+                   'local_path': '/Users/ricardotanaka/Documents/Projetos/COVID/einstein_full_dataset_exames.csv',
                    'delimiter': '|',
                    'encoding': 'utf-8',
                    'truncate': True}
@@ -92,10 +118,10 @@ with DAG(dag_id='tanatech_dag',
     # Patients
     load_stg_patients_sirio = PythonOperator(
         task_id='load_stg_patients_sirio',
-        python_callable=copy_from_file,
+        python_callable=copy_from_local_file,
         op_kwargs={'schema': 'stage',
                    'table': 'stg_patients_sirio',
-                   'local_path': '/mnt/sharedstorage/hsl_patient_1.csv',
+                   'local_path': '/Users/ricardotanaka/Documents/Projetos/COVID/hsl_patient_1.csv',
                    'delimiter': '|',
                    'encoding': 'utf-8',
                    'truncate': True}
@@ -103,10 +129,10 @@ with DAG(dag_id='tanatech_dag',
 
     load_stg_patients_fleury = PythonOperator(
         task_id='load_stg_patients_fleury',
-        python_callable=copy_from_file,
+        python_callable=copy_from_local_file,
         op_kwargs={'schema': 'stage',
                    'table': 'stg_patients_fleury',
-                   'local_path': '/mnt/sharedstorage/Grupo_Fleury_Dataset_Covid19_Pacientes.csv',
+                   'local_path': '/Users/ricardotanaka/Documents/Projetos/COVID/Grupo_Fleury_Dataset_Covid19_Pacientes.csv',
                    'delimiter': '|',
                    'encoding': 'latin1',
                    'truncate': True}
@@ -114,10 +140,21 @@ with DAG(dag_id='tanatech_dag',
 
     load_stg_patients_einstein = PythonOperator(
         task_id='load_stg_patients_einstein',
-        python_callable=copy_from_file,
+        python_callable=copy_from_local_file,
         op_kwargs={'schema': 'stage',
                    'table': 'stg_patients_einstein',
-                   'local_path': '/mnt/sharedstorage/einstein_full_dataset_paciente.csv',
+                   'local_path': '/Users/ricardotanaka/Documents/Projetos/COVID/einstein_full_dataset_paciente.csv',
+                   'delimiter': '|',
+                   'encoding': 'utf-8',
+                   'truncate': True}
+    )
+
+    load_stg_desfecho_sirio = PythonOperator(
+        task_id='load_stg_desfecho_sirio',
+        python_callable=copy_from_local_file,
+        op_kwargs={'schema': 'stage',
+                   'table': 'stg_desfecho_sirio',
+                   'local_path': '/Users/ricardotanaka/Documents/Projetos/COVID/hsl_desfecho_1.csv',
                    'delimiter': '|',
                    'encoding': 'utf-8',
                    'truncate': True}
@@ -158,6 +195,7 @@ with DAG(dag_id='tanatech_dag',
     start_dag >> load_stg_patients_sirio
     start_dag >> load_stg_patients_fleury
     start_dag >> load_stg_patients_einstein
+    start_dag >> load_stg_desfecho_sirio
 
     load_stg_exam_results_sirio >> join_stage_exams
     load_stg_exam_results_fleury >> join_stage_exams
