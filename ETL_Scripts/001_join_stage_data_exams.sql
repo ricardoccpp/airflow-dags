@@ -96,28 +96,28 @@ order by 1, 2, 3, 4
 ----------------------------------------------------------------------
 update stage.stg_exam_results_full
 set
-	cd_tipo_comparacao = case when de_valor_referencia ilike 'inferior a %'
+	cd_tipo_comparacao = case when de_valor_referencia ilike 'inferior a %%'
 							then 'less than'
 							else 'equal to'
 						end,
-	nu_limite_inferior = case when de_valor_referencia ilike 'inferior a %'
+	nu_limite_inferior = case when de_valor_referencia ilike 'inferior a %%'
 							then null
 						end::decimal,
-	nu_limite_superior = case when de_valor_referencia ilike 'inferior a %'
+	nu_limite_superior = case when de_valor_referencia ilike 'inferior a %%'
 							then null
 						end::decimal,
-	nu_referencia_unica = case when de_valor_referencia ilike 'inferior a %'
+	nu_referencia_unica = case when de_valor_referencia ilike 'inferior a %%'
 						then trim(replace(replace(de_valor_referencia, 'inferior a ', ''), ',', '.'))
 						else null
 					end::decimal,
-	cd_referencia_exata = case when de_valor_referencia ilike 'inferior a %'
+	cd_referencia_exata = case when de_valor_referencia ilike 'inferior a %%'
 							then null
 							else upper(de_valor_referencia)
 						end,
 	fl_teste_covid19 = true
 where 1 = 1
 	and na_instituicao = 'Fleury'
-	and de_analito ilike '%covid%'
+	and de_analito ilike '%%covid%%'
 	and de_valor_referencia is not null
 ;
 
@@ -137,35 +137,35 @@ set
 							end
 where 1 = 1
 	and na_instituicao = 'Fleury'
-	and de_analito ilike '%covid%'
+	and de_analito ilike '%%covid%%'
 	and de_valor_referencia is not null
 ;
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 update stage.stg_exam_results_full
 set
-	cd_tipo_comparacao = case when de_valor_referencia ilike '<=%'
+	cd_tipo_comparacao = case when de_valor_referencia ilike '<=%%'
 							then 'less than or equal to'
 							else 'equal to'
 						end,
-	nu_limite_inferior = case when de_valor_referencia ilike '<=%'
+	nu_limite_inferior = case when de_valor_referencia ilike '<=%%'
 							then null
 						end::decimal,
-	nu_limite_superior = case when de_valor_referencia ilike '<=%'
+	nu_limite_superior = case when de_valor_referencia ilike '<=%%'
 							then null
 						end::decimal,
-	nu_referencia_unica = case when de_valor_referencia ilike '<=%'
+	nu_referencia_unica = case when de_valor_referencia ilike '<=%%'
 						then trim(replace(replace(de_valor_referencia, '<=', ''), ',', '.'))::decimal
 						else null
 					end::decimal,
-	cd_referencia_exata = case when de_valor_referencia ilike '<=%'
+	cd_referencia_exata = case when de_valor_referencia ilike '<=%%'
 							then null
 							else upper(de_valor_referencia)
 						end,
 	fl_teste_covid19 = true
 where 1 = 1
 	and na_instituicao = 'Einstein'
-	and de_analito ilike '%covid%'
+	and de_analito ilike '%%covid%%'
 	and de_valor_referencia is not null
 ;
 
@@ -188,7 +188,7 @@ set
 							end
 where 1 = 1
 	and na_instituicao = 'Einstein'
-	and de_analito ilike '%covid%'
+	and de_analito ilike '%%covid%%'
 	and de_valor_referencia is not null
 ;
 
